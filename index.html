@@ -211,6 +211,28 @@ nav.main-nav a:hover{color:#fff}
 .testing-row .t-days .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--coral))}
 .btn.small{padding:10px 20px;font-size:.9rem}
 
+/* ---------- Club apps showcase ---------- */
+.apps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px;max-width:960px;margin:0 auto}
+.app-card{
+  background:linear-gradient(180deg,#ffffff,#faf8ff);border:1px solid #e6e0f4;border-radius:var(--radius);
+  padding:24px 22px;box-shadow:0 14px 32px rgba(29,20,64,.12);text-align:left;
+  transition:transform .15s ease,box-shadow .15s ease;display:flex;flex-direction:column;gap:8px;
+}
+.app-card:hover{transform:translateY(-5px);box-shadow:0 24px 48px rgba(29,20,64,.18),0 0 0 1.5px rgba(212,175,55,.55)}
+.app-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.app-card-top h3{font-size:1.14rem}
+.app-by{color:var(--ink-soft);font-size:.9rem}
+.app-owner{
+  background:none;border:none;padding:0;font:inherit;font-weight:700;color:var(--teal-dark);
+  cursor:pointer;text-decoration:underline;text-underline-offset:2px;
+}
+.app-owner:hover{color:var(--indigo-3)}
+.app-goal{color:var(--ink-soft);font-size:.94rem}
+.app-btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:8px}
+.apps-note{max-width:640px;margin:26px auto 0;text-align:center;color:var(--ink-soft);font-size:.95rem}
+.apps-note a{font-weight:700}
+.member-card .apps-names{margin-top:4px;font-size:.85rem;font-weight:700;color:var(--teal-dark)}
+
 /* ---------- Certificate ---------- */
 .cert-scroll{overflow-x:auto;padding:6px 2px 14px}
 .cert{
@@ -546,6 +568,16 @@ body.splash-lock{overflow:hidden}
   </div>
 </section>
 
+<!-- ================= CLUB APPS ================= -->
+<section id="apps" style="padding-top:10px">
+  <div class="wrap">
+    <h2 class="sec-title reveal" data-i18n="apps_title">Club apps</h2>
+    <p class="sec-sub reveal" data-i18n="apps_sub">The apps we are all testing right now, together.</p>
+    <div class="apps-grid" id="appsGrid"></div>
+    <p class="apps-note reveal"><span data-i18n="apps_note">Are you a member and want to add another app or change a link? Message me on Telegram and we'll update it.</span><br><a href="https://t.me/+pKKVok9n4yE2ZWMx" target="_blank" rel="noopener">Telegram ↗</a></p>
+  </div>
+</section>
+
 <!-- ================= THE COMMITMENT ================= -->
 <section id="commitment" class="dark">
   <div class="wrap">
@@ -784,7 +816,8 @@ function renderMembers(){
       '<div class="country">' + (m.country ? m.country : "—") + '</div>' +
       (m.role === "founder" ? '<span class="badge founder">' + t("badge_founder") + '</span>' : '') +
       (m.role === "ally" ? '<span class="badge ally">' + t("badge_ally") + '</span>' : '') +
-      '<div class="apps-count">' + total + ' ' + (total === 1 ? t("app_word_one") : t("app_word_many")) + '</div>';
+      '<div class="apps-count">' + total + ' ' + (total === 1 ? t("app_word_one") : t("app_word_many")) + '</div>' +
+      (total ? '<div class="apps-names">' + m.testing.concat(m.launched).map(a => a.name).join(' · ') + '</div>' : '');
     card.addEventListener("click", () => openProfile(i));
     grid.appendChild(card);
   });
@@ -810,6 +843,35 @@ function renderTesting(){
         '<div class="t-days">' + t("day_of") + ' ' + d + ' / 14 · ' + left + ' ' + t("days_left") +
         '<div class="bar"><i style="width:' + Math.round(d/14*100) + '%"></i></div></div>' + action;
       list.appendChild(row);
+    });
+  });
+}
+
+function renderApps(){
+  const grid = document.getElementById("appsGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  MEMBERS.forEach((m, i) => {
+    (m.testing || []).forEach(a => {
+      const d = dayOf14(a.start);
+      const done = daysLeft(a.start) <= 0;
+      const card = document.createElement("div");
+      card.className = "app-card reveal in";
+      let btns = "";
+      if (a.link) btns += '<a class="btn teal small" target="_blank" rel="noopener" href="' + a.link + '">' + linkLabelText(a.linkLabel) + '</a>';
+      else btns += '<span class="empty-note">' + t("link_by_list") + '</span>';
+      if (a.storeUrl) btns += '<a class="btn gold small" target="_blank" rel="noopener" href="' + a.storeUrl + '">' + t("link_view_store") + '</a>';
+      const desc = a.descKey ? t(a.descKey) : (a.desc || "");
+      card.innerHTML =
+        '<div class="app-card-top"><h3>' + a.name + '</h3>' +
+        '<span class="day-pill' + (done ? ' done' : '') + '">' + t("day_of") + ' ' + d + ' / 14</span></div>' +
+        '<div class="app-by">' + t("by_word") + ' <button type="button" class="app-owner">' + m.name + '</button></div>' +
+        (desc ? '<p class="app-goal">' + desc + '</p>' : '') +
+        (a.goal ? '<p class="app-goal">🎯 ' + a.goal + '</p>' : '') +
+        '<div class="app-btns">' + btns + '</div>';
+      const ownerBtn = card.querySelector(".app-owner");
+      if (ownerBtn) ownerBtn.addEventListener("click", () => openProfile(i));
+      grid.appendChild(card);
     });
   });
 }
@@ -888,6 +950,7 @@ function applyLang(lang){
   try { localStorage.setItem("twl_lang", lang); } catch(e){}
   renderMembers();
   renderTesting();
+  renderApps();
 }
 document.getElementById("langSelect").addEventListener("change", e => applyLang(e.target.value));
 
