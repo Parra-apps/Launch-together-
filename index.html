@@ -525,7 +525,8 @@ footer a{color:var(--teal)}
 /* ============================================================
    DATA — member list. Edit this array to add members or apps.
    testing: { name, desc, link (opt-in / join / store URL or "" ),
-              linkLabel: "optin" | "join" | "store" | "list", start: "YYYY-MM-DD" }
+              linkLabel: "optin" | "join" | "store" | "list",
+              storeUrl: optional Google Play store URL, start: "YYYY-MM-DD" }
    launched: { name }  (apps that reached production)
    socials: { instagram / threads / x / youtube / facebook / tiktok / linkedin / github / web: URL }
    ============================================================ */
@@ -535,7 +536,7 @@ const MEMBERS = [
     name: "Jose Parra", country: "United States", role: "founder", noteKey: "", telegram: "ParraApps",
     socials: { facebook: "https://www.facebook.com/profile.php?id=61594945697686", youtube: "https://www.youtube.com/@ParraApps", x: "https://x.com/JoseParra9107" },
     testing: [
-      { name: "CuidaJuntos", descKey: "app_cuidajuntos_desc", link: "https://play.google.com/apps/testing/com.cuidajuntos.app", linkLabel: "optin", start: "2026-10-14" }
+      { name: "CuidaJuntos", descKey: "app_cuidajuntos_desc", link: "https://play.google.com/apps/testing/com.cuidajuntos.app", linkLabel: "optin", storeUrl: "https://play.google.com/store/apps/details?id=com.cuidajuntos.app", start: "2026-10-14" }
     ],
     launched: []
   }
@@ -616,6 +617,7 @@ function appRowHTML(a, lang){
   let link = "";
   if (a.link) link = '<a class="tester-link" target="_blank" rel="noopener" href="' + a.link + '">' + linkLabelText(a.linkLabel) + ' →</a>';
   else link = '<span class="empty-note">' + t("link_by_list") + '</span>';
+  if (a.storeUrl) link += ' <a class="tester-link" target="_blank" rel="noopener" href="' + a.storeUrl + '">' + t("link_view_store") + ' →</a>';
   return '<div class="app-row"><div class="app-name">' + a.name + '</div>' +
     '<div class="app-desc">' + t(a.descKey) + '</div>' +
     '<div class="app-meta"><span>' + t("started_on") + ' ' + fmtDate(a.start, lang) + '</span>' +
